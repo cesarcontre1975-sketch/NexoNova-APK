@@ -27,14 +27,10 @@ jobs:
       - name: Comprobar y extraer proyecto
         run: |
           ls -la
-          if [ ! -f Proyecto_APK_NexoNova.zip ]; then
-            echo "No se encontro el archivo ZIP"
+          if [ ! -f NexoNova_APK_Project.zip ]; then 
             exit 1
           fi
-          mkdir -p proyecto
-          unzip -o Proyecto_APK_NexoNova.zip -d proyecto
-          find proyecto -maxdepth 4 -name gradlew -type f
-
+          unzip -q NexoNova_APK_Project.zip -d proyecto
       - name: Compilar APK
         run: |
           GRADLEW="$(find proyecto -type f -name gradlew -print -quit)"
