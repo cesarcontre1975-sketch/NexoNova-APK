@@ -26,25 +26,33 @@ jobs:
 
       - name: Comprobar y extraer proyecto
         run: |
-          ls -la
-          if [ ! -f NexoNova_APK_Project.zip ]; then 
-            exit 1
-          fi
-          unzip -q NexoNova_APK_Project.zip -d proyecto
-      - name: Compilar APK
-        run: |
+          set -eu
+          test -f NexoNova_APK_Project.zip
+          mkdir -p proyecto
+          unzip -oq NexoNova_APK_Project.zip -d proyecto
+          echo "Contenido del proyecto:"
+          find proyecto -maxdepth 4 -type f | head -80
           GRADLEW="$(find proyecto -type f -name gradlew -print -quit)"
           if [ -z "$GRADLEW" ]; then
-            echo "No se encontro gradlew dentro del ZIP"
-            find proyecto -maxdepth 5 -type f
+            echo "No se encontró gradlew. Se intentará usar Gradle instalado."
+          fi
+
+      - name: Compilar APK
+        run: |
+          set -eu
+          GRADLEW="$(find proyecto -type f -name gradlew -print -quit)"
+          if [ -n "$GRADLEW" ]; then
+            DIR="$(dirname "$GRADLEW")"
+            cd "$DIR"
+            chmod +x gradlew
+            ./gradlew assembleDebug
+          else
+            echo "El proyecto no incluye gradlew. No se puede compilar todavía."
             exit 1
           fi
-          DIR="$(dirname "$GRADLEW")"
-          cd "$DIR"
-          chmod +x gradlew
-          ./gradlew assembleDebug
 
       - name: Guardar APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: NexoNova-APK
