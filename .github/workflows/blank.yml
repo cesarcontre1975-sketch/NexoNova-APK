@@ -1,3 +1,4 @@
+
 name: Construir APK NexoNova
 
 on:
@@ -23,18 +24,23 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Extraer proyecto
+      - name: Comprobar y extraer proyecto
         run: |
-          test -f Proyecto_APK_NexoNova.zip
-          mkdir proyecto
-          unzip -q Proyecto_APK_NexoNova.zip -d proyecto
+          ls -la
+          if [ ! -f Proyecto_APK_NexoNova.zip ]; then
+            echo "No se encontro el archivo ZIP"
+            exit 1
+          fi
+          mkdir -p proyecto
+          unzip -o Proyecto_APK_NexoNova.zip -d proyecto
+          find proyecto -maxdepth 4 -name gradlew -type f
 
       - name: Compilar APK
         run: |
           GRADLEW="$(find proyecto -type f -name gradlew -print -quit)"
           if [ -z "$GRADLEW" ]; then
-            echo "No se encontró gradlew dentro del ZIP"
-            find proyecto -maxdepth 3 -type f
+            echo "No se encontro gradlew dentro del ZIP"
+            find proyecto -maxdepth 5 -type f
             exit 1
           fi
           DIR="$(dirname "$GRADLEW")"
